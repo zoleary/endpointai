@@ -1,0 +1,308 @@
+{
+  "items": [
+    {
+      "id": "dev_1000",
+      "hostname": "ACME-MBP-ALICE",
+      "serial": "C02X0000ZX",
+      "email": "alice.chen@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "monitor",
+      "version": "2.7.4",
+      "status": "offline",
+      "health": "degraded",
+      "last_seen": "2026-09-29T12:00:00Z"
+    },
+    {
+      "id": "dev_1001",
+      "hostname": "ACME-MBP-BOB",
+      "serial": "C02X0001ZX",
+      "email": "bob.patel@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T17:53:00Z"
+    },
+    {
+      "id": "dev_1002",
+      "hostname": "ACME-WIN-CAROL",
+      "serial": "C02X0002ZX",
+      "email": "carol.diaz@acme.example",
+      "os": "windows",
+      "os_version": "11 24H2",
+      "arch": "x86_64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T17:46:00Z"
+    },
+    {
+      "id": "dev_1003",
+      "hostname": "ACME-MBP-DEV",
+      "serial": "C02X0003ZX",
+      "email": "dev.kim@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.7.4",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T17:39:00Z"
+    },
+    {
+      "id": "dev_1004",
+      "hostname": "ACME-LNX-ERIN",
+      "serial": "C02X0004ZX",
+      "email": "erin.walsh@acme.example",
+      "os": "linux",
+      "os_version": "Ubuntu 24.04",
+      "arch": "x86_64",
+      "agent_mode": "monitor",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T17:32:00Z"
+    },
+    {
+      "id": "dev_1005",
+      "hostname": "ACME-WIN-FRANK",
+      "serial": "C02X0005ZX",
+      "email": "frank.osei@acme.example",
+      "os": "windows",
+      "os_version": "11 24H2",
+      "arch": "x86_64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "offline",
+      "health": "healthy",
+      "last_seen": "2026-09-29T11:55:00Z"
+    },
+    {
+      "id": "dev_1006",
+      "hostname": "ACME-MBP-ALICE-06",
+      "serial": "C02X0006ZX",
+      "email": "alice.chen@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.7.4",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T17:18:00Z"
+    },
+    {
+      "id": "dev_1007",
+      "hostname": "ACME-MBP-BOB-07",
+      "serial": "C02X0007ZX",
+      "email": "bob.patel@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "degraded",
+      "last_seen": "2026-09-30T17:11:00Z"
+    },
+    {
+      "id": "dev_1008",
+      "hostname": "ACME-WIN-CAROL-08",
+      "serial": "C02X0008ZX",
+      "email": "carol.diaz@acme.example",
+      "os": "windows",
+      "os_version": "11 24H2",
+      "arch": "x86_64",
+      "agent_mode": "monitor",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T17:04:00Z"
+    },
+    {
+      "id": "dev_1009",
+      "hostname": "ACME-MBP-DEV-09",
+      "serial": "C02X0009ZX",
+      "email": "dev.kim@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.7.4",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T16:57:00Z"
+    },
+    {
+      "id": "dev_1010",
+      "hostname": "ACME-LNX-ERIN-10",
+      "serial": "C02X0010ZX",
+      "email": "erin.walsh@acme.example",
+      "os": "linux",
+      "os_version": "Ubuntu 24.04",
+      "arch": "x86_64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "offline",
+      "health": "healthy",
+      "last_seen": "2026-09-29T11:50:00Z"
+    },
+    {
+      "id": "dev_1011",
+      "hostname": "ACME-WIN-FRANK-11",
+      "serial": "C02X0011ZX",
+      "email": "frank.osei@acme.example",
+      "os": "windows",
+      "os_version": "11 24H2",
+      "arch": "x86_64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T16:43:00Z"
+    },
+    {
+      "id": "dev_1012",
+      "hostname": "ACME-MBP-ALICE-12",
+      "serial": "C02X0012ZX",
+      "email": "alice.chen@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "monitor",
+      "version": "2.7.4",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T16:36:00Z"
+    },
+    {
+      "id": "dev_1013",
+      "hostname": "ACME-MBP-BOB-13",
+      "serial": "C02X0013ZX",
+      "email": "bob.patel@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T16:29:00Z"
+    },
+    {
+      "id": "dev_1014",
+      "hostname": "ACME-WIN-CAROL-14",
+      "serial": "C02X0014ZX",
+      "email": "carol.diaz@acme.example",
+      "os": "windows",
+      "os_version": "11 24H2",
+      "arch": "x86_64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "degraded",
+      "last_seen": "2026-09-30T16:22:00Z"
+    },
+    {
+      "id": "dev_1015",
+      "hostname": "ACME-MBP-DEV-15",
+      "serial": "C02X0015ZX",
+      "email": "dev.kim@acme.example",
+      "os": "macos",
+      "os_version": "15.6",
+      "arch": "arm64",
+      "agent_mode": "enforce",
+      "version": "2.7.4",
+      "status": "offline",
+      "health": "healthy",
+      "last_seen": "2026-09-29T11:45:00Z"
+    },
+    {
+      "id": "dev_1016",
+      "hostname": "ACME-LNX-ERIN-16",
+      "serial": "C02X0016ZX",
+      "email": "erin.walsh@acme.example",
+      "os": "linux",
+      "os_version": "Ubuntu 24.04",
+      "arch": "x86_64",
+      "agent_mode": "monitor",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T16:08:00Z"
+    },
+    {
+      "id": "dev_1017",
+      "hostname": "ACME-WIN-FRANK-17",
+      "serial": "C02X0017ZX",
+      "email": "frank.osei@acme.example",
+      "os": "windows",
+      "os_version": "11 24H2",
+      "arch": "x86_64",
+      "agent_mode": "enforce",
+      "version": "2.8.1",
+      "status": "online",
+      "health": "healthy",
+      "last_seen": "2026-09-30T16:01:00Z"
+    }
+  ],
+  "stats": {
+    "total": 18,
+    "online": 14,
+    "offline": 4,
+    "healthy": 15,
+    "degraded": 3,
+    "by_os": {
+      "macos": 9,
+      "windows": 6,
+      "linux": 3
+    },
+    "by_agent_mode": {
+      "enforce": 13,
+      "monitor": 5
+    }
+  },
+  "facets": {
+    "status": [
+      {
+        "value": "online",
+        "count": 14
+      },
+      {
+        "value": "offline",
+        "count": 4
+      }
+    ],
+    "health": [
+      {
+        "value": "healthy",
+        "count": 15
+      },
+      {
+        "value": "degraded",
+        "count": 3
+      }
+    ],
+    "os": [
+      {
+        "value": "macos",
+        "count": 9
+      },
+      {
+        "value": "windows",
+        "count": 6
+      },
+      {
+        "value": "linux",
+        "count": 3
+      }
+    ]
+  }
+}
