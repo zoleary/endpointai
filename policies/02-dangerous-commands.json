@@ -1,82 +1,104 @@
 {
   "name": "Lab 02 - Destructive & dangerous commands",
-  "description": "Blocks commands that destroy data, run untrusted code or weaken the device. OWASP LLM06 Excessive Agency. TEMPLATE: match.field names are placeholders until checked against GET /v1/policies/patterns or a rule exported from the console. Dry-run with scripts/create-policies.sh (validate only).",
   "enabled": true,
-  "rules": [
-    {
-      "id": "block-rm-rf",
-      "ruleType": "tool",
-      "match": {
-        "field": "tool_input.command",
-        "op": "matches",
-        "value": "rm\\s+-[a-zA-Z]*([rR]f|f[rR])[a-zA-Z]*\\b"
+  "rules": {
+    "description": "Blocks commands that destroy data, run untrusted code or weaken the device. OWASP LLM06 Excessive Agency.",
+    "rules": [
+      {
+        "id": "block-rm-rf",
+        "ruleType": "threat_prevention",
+        "events": [
+          "PreToolUse"
+        ],
+        "match": {
+          "any": [
+            {
+              "field": "tool_input.command",
+              "op": "regex",
+              "value": "rm\\s+-[a-zA-Z]*([rR]f|f[rR])[a-zA-Z]*\\b"
+            }
+          ]
+        },
+        "verdict": "block",
+        "reason": "Blocked by Zscaler: recursive force-delete needs a human.",
+        "agent_message": "Blocked by your organization's AI security policy (Zscaler lab). This is a deliberate block, not an error: do not retry or attempt workarounds. Stop and inform the user."
       },
-      "events": [
-        "PreToolUse"
-      ],
-      "verdict": "block",
-      "reason": "Recursive force delete",
-      "user_message": "Blocked by Zscaler: recursive force-delete needs a human."
-    },
-    {
-      "id": "block-curl-pipe-shell",
-      "ruleType": "tool",
-      "match": {
-        "field": "tool_input.command",
-        "op": "matches",
-        "value": "(curl|wget)[^|]*\\|\\s*(sudo\\s+)?(sh|bash|zsh|python3?)\\b"
+      {
+        "id": "block-curl-pipe-shell",
+        "ruleType": "threat_prevention",
+        "events": [
+          "PreToolUse"
+        ],
+        "match": {
+          "any": [
+            {
+              "field": "tool_input.command",
+              "op": "regex",
+              "value": "(curl|wget)[^|]*\\|\\s*(sudo\\s+)?(sh|bash|zsh|python3?)\\b"
+            }
+          ]
+        },
+        "verdict": "block",
+        "reason": "Blocked by Zscaler: piping a downloaded script into a shell is not allowed.",
+        "agent_message": "Blocked by your organization's AI security policy (Zscaler lab). This is a deliberate block, not an error: do not retry or attempt workarounds. Stop and inform the user."
       },
-      "events": [
-        "PreToolUse"
-      ],
-      "verdict": "block",
-      "reason": "Remote script piped to an interpreter",
-      "user_message": "Blocked by Zscaler: piping a downloaded script into a shell is not allowed."
-    },
-    {
-      "id": "block-world-writable",
-      "ruleType": "tool",
-      "match": {
-        "field": "tool_input.command",
-        "op": "matches",
-        "value": "chmod\\s+(-R\\s+)?(777|a\\+rwx)"
+      {
+        "id": "block-world-writable",
+        "ruleType": "threat_prevention",
+        "events": [
+          "PreToolUse"
+        ],
+        "match": {
+          "any": [
+            {
+              "field": "tool_input.command",
+              "op": "regex",
+              "value": "chmod\\s+(-R\\s+)?(777|a\\+rwx)"
+            }
+          ]
+        },
+        "verdict": "block",
+        "reason": "Blocked by Zscaler: chmod 777 is not allowed.",
+        "agent_message": "Blocked by your organization's AI security policy (Zscaler lab). This is a deliberate block, not an error: do not retry or attempt workarounds. Stop and inform the user."
       },
-      "events": [
-        "PreToolUse"
-      ],
-      "verdict": "block",
-      "reason": "Made files world-writable",
-      "user_message": "Blocked by Zscaler: chmod 777 is not allowed."
-    },
-    {
-      "id": "block-security-tamper",
-      "ruleType": "tool",
-      "match": {
-        "field": "tool_input.command",
-        "op": "matches",
-        "value": "spctl\\s+--master-disable|csrutil\\s+disable|xattr\\s+-[a-z]*d[a-z]*\\s+com\\.apple\\.quarantine|launchctl\\s+(unload|bootout).*(zscaler|sqrx)"
+      {
+        "id": "block-security-tamper",
+        "ruleType": "threat_prevention",
+        "events": [
+          "PreToolUse"
+        ],
+        "match": {
+          "any": [
+            {
+              "field": "tool_input.command",
+              "op": "regex",
+              "value": "spctl\\s+--master-disable|csrutil\\s+disable|xattr\\s+-[a-z]*d[a-z]*\\s+com\\.apple\\.quarantine|launchctl\\s+(unload|bootout).*(zscaler|sqrx)"
+            }
+          ]
+        },
+        "verdict": "block",
+        "reason": "Blocked by Zscaler: changing device security settings is not allowed.",
+        "agent_message": "Blocked by your organization's AI security policy (Zscaler lab). This is a deliberate block, not an error: do not retry or attempt workarounds. Stop and inform the user."
       },
-      "events": [
-        "PreToolUse"
-      ],
-      "verdict": "block",
-      "reason": "Attempt to weaken OS or endpoint security",
-      "user_message": "Blocked by Zscaler: changing device security settings is not allowed."
-    },
-    {
-      "id": "audit-sudo",
-      "ruleType": "tool",
-      "match": {
-        "field": "tool_input.command",
-        "op": "matches",
-        "value": "(^|\\s|;|&&)sudo\\s"
-      },
-      "events": [
-        "PreToolUse"
-      ],
-      "verdict": "audit",
-      "reason": "Privileged command by agent",
-      "user_message": "Logged by Zscaler: sudo used by an AI agent."
-    }
-  ]
+      {
+        "id": "audit-sudo",
+        "ruleType": "threat_prevention",
+        "events": [
+          "PreToolUse"
+        ],
+        "match": {
+          "any": [
+            {
+              "field": "tool_input.command",
+              "op": "regex",
+              "value": "(^|\\s|;|&&)sudo\\s"
+            }
+          ]
+        },
+        "verdict": "audit",
+        "reason": "Logged by Zscaler: sudo used by an AI agent.",
+        "agent_message": "This action was logged by your organization's AI security policy (Zscaler lab)."
+      }
+    ]
+  }
 }

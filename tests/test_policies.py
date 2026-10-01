@@ -28,17 +28,31 @@ CASES = {
 }
 
 
+BUILTIN = {"block-secrets-in-prompt", "block-secrets-in-tool-input"}  # filled from tenant patterns at create time
+
+
 def patterns(match):
-    if "any" in match:
-        return [p for m in match["any"] for p in patterns(m)]
-    return [match["value"]]
+    return [m["value"] for m in match["any"] if "value" in m]
 
 
-RULES = [rule for f in sorted(Path("policies").glob("0[1-4]-*.json")) for rule in json.loads(f.read_text())["rules"]]
+POLICIES = [json.loads(f.read_text()) for f in sorted(Path("policies").glob("0[1-4]-*.json"))]
+RULES = [r for p in POLICIES for r in p["rules"]["rules"] if r["id"] not in BUILTIN]
 
 
 def test_every_rule_has_cases():
     assert {r["id"] for r in RULES} == set(CASES)
+
+
+@pytest.mark.parametrize("policy", POLICIES, ids=lambda p: p["name"])
+def test_policy_matches_tenant_shape(policy):
+    assert set(policy) == {"name", "enabled", "rules"} and set(policy["rules"]) == {"description", "rules"}
+    for r in policy["rules"]["rules"]:
+        assert {"id", "ruleType", "events", "match", "verdict", "reason", "agent_message"} <= set(r)
+        assert r["ruleType"] in {"data_protection", "threat_prevention", "prompt_security", "shadow_it", "compliance", "mcp_security"}
+        assert r["verdict"] in ("block", "audit", "allow")
+        for m in r["match"]["any"]:
+            assert ("pattern_id" in m and "value" not in m) or (m["op"] == "regex" and m["field"] in
+                    {"prompt", "tool_input.command", "tool_input_text", "tool_output"})
 
 
 @pytest.mark.parametrize("rule", RULES, ids=lambda r: r["id"])
@@ -49,4 +63,4 @@ def test_rule_patterns(rule):
         assert any(p.search(cmd) for p in pats), f"should match: {cmd}"
     for cmd in miss:
         assert not any(p.search(cmd) for p in pats), f"should NOT match: {cmd}"
-    assert rule["verdict"] in ("block", "audit", "allow") and rule["user_message"]
+    assert rule["reason"]

@@ -17,3 +17,5 @@
 | 2026-10-01 | `scripts/create-policies.sh` (dry run, `--apply` asks per policy) | not tested | Needs Mac + API key; `--apply` needs an admin key |
 | 2026-10-01 | `docs/TEST_PLAN.md`: 6 discovery + 24 enforcement + 5 reporting tests | not tested | Run and fill in the Results log |
 | 2026-10-01 | Lab adds fake `keys/id_rsa`, `.aws/credentials`, `.kube/config` inside `~/zsai-demo` | worked | Real `~/.ssh` and `~/.aws` are never touched |
+| 2026-10-01 | Read real policy format from snapshot | worked | `op: regex`; fields `prompt` / `tool_input.command` / `tool_input_text` / `tool_output`; rules nested as `rules.rules`; rule has `ruleType`, `events`, `verdict`, `reason`, `agent_message` |
+| 2026-10-01 | Rewrote policies 01–04 in tenant format; Lab 01 now uses built-in patterns by `pattern_id` | not tested | `create-policies.sh` fills in built-in regexes from the latest snapshot. 38 offline tests pass |
