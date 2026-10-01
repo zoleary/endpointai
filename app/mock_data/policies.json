@@ -1,0 +1,146 @@
+{
+  "items": [
+    {
+      "id": "pol_default",
+      "name": "Default developer policy",
+      "description": "Baseline guardrails for all AI coding agents",
+      "enabled": true,
+      "version": 7,
+      "updated_at": "2026-09-27T18:00:00Z",
+      "rules": [
+        {
+          "id": "r1",
+          "ruleType": "tool_guard",
+          "match": {
+            "all": [
+              {
+                "field": "tool",
+                "op": "eq",
+                "value": "Bash"
+              },
+              {
+                "field": "tool_input.command",
+                "op": "regex",
+                "value": "rm\\s+-rf\\s+(/|~)"
+              }
+            ]
+          },
+          "events": [
+            "PreToolUse"
+          ],
+          "verdict": "block",
+          "reason": "Destructive filesystem command",
+          "user_message": "Blocked by Zscaler: destructive command."
+        },
+        {
+          "id": "r2",
+          "ruleType": "tool_guard",
+          "match": {
+            "field": "tool_input.file_path",
+            "op": "glob",
+            "value": "~/.aws/credentials"
+          },
+          "events": [
+            "PreToolUse"
+          ],
+          "verdict": "block",
+          "reason": "Access to credential file",
+          "user_message": "Reading cloud credentials is not allowed."
+        },
+        {
+          "id": "r3",
+          "ruleType": "tool_guard",
+          "match": {
+            "field": "tool_input.command",
+            "op": "regex",
+            "value": "curl .*(-F|--data|-d) "
+          },
+          "events": [
+            "PreToolUse"
+          ],
+          "verdict": "audit",
+          "reason": "Upload to external host",
+          "user_message": ""
+        }
+      ]
+    },
+    {
+      "id": "pol_mcp",
+      "name": "MCP allow-list",
+      "description": "Only catalogue-approved MCP servers",
+      "enabled": true,
+      "version": 3,
+      "updated_at": "2026-09-20T18:00:00Z",
+      "rules": [
+        {
+          "id": "m1",
+          "ruleType": "mcp_guard",
+          "match": {
+            "not": {
+              "field": "mcp.server",
+              "op": "in_list",
+              "value": "approved-mcp"
+            }
+          },
+          "events": [
+            "PreToolUse"
+          ],
+          "verdict": "block",
+          "reason": "MCP server not approved",
+          "user_message": "This MCP server is not approved by IT."
+        }
+      ]
+    },
+    {
+      "id": "pol_contractors",
+      "name": "Contractor lockdown",
+      "description": "Stricter rules for contractors group",
+      "enabled": true,
+      "version": 2,
+      "updated_at": "2026-09-10T18:00:00Z",
+      "rules": [
+        {
+          "id": "c1",
+          "ruleType": "tool_guard",
+          "match": {
+            "field": "tool",
+            "op": "in",
+            "value": [
+              "WebFetch",
+              "WebSearch"
+            ]
+          },
+          "events": [
+            "PreToolUse"
+          ],
+          "verdict": "block",
+          "reason": "No web access for contractors",
+          "user_message": "Web tools are disabled for contractors."
+        }
+      ]
+    }
+  ],
+  "patterns": {
+    "items": [
+      {
+        "id": "destructive_shell",
+        "description": "rm -rf, mkfs, dd to disk"
+      },
+      {
+        "id": "credential_files",
+        "description": "~/.aws, ~/.ssh, .env"
+      }
+    ]
+  },
+  "effective": {
+    "default": [
+      "pol_default",
+      "pol_mcp"
+    ],
+    "frank.osei@acme.example": [
+      "pol_default",
+      "pol_mcp",
+      "pol_contractors"
+    ]
+  }
+}

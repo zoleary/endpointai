@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endpoint AI Security Demo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%232f81f7%22/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2230; --border: #2d3544; --text: #e6edf3; --muted: #8b949e;
+    --accent: #2f81f7; --ok: #3fb950; --warn: #d29922; --bad: #f85149; --crit: #ff4d9d; --unk: #8b949e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  header { display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0 14px 0 0; } header h1 span { color: var(--accent); }
+  .pill { padding: 3px 10px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  .pill b { color: var(--text); }
+  .pill.live b { color: var(--ok); } .pill.mock b { color: var(--warn); }
+  nav { display: flex; gap: 4px; padding: 0 20px; background: var(--panel); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; color: var(--muted); padding: 10px 14px; cursor: pointer; font: inherit; border-bottom: 2px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 14px; padding: 14px 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px; min-width: 0; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .kpi { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .kpi .v { font-size: 24px; font-weight: 700; } .kpi .l { font-size: 12px; color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  tr.click { cursor: pointer; } tr.click:hover td { background: var(--panel2); }
+  .tablewrap { overflow-x: auto; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .b-ok { background: rgba(63,185,80,.16); color: #56d364; } .b-warn { background: rgba(210,153,34,.18); color: #e3b341; }
+  .b-bad { background: rgba(248,81,73,.18); color: #ff7b72; } .b-crit { background: rgba(255,77,157,.18); color: #ff7ab8; }
+  .b-unk { background: #21262d; color: var(--muted); border: 1px dashed #484f58; } .b-info { background: rgba(47,129,247,.16); color: #79c0ff; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font: inherit; font-size: 13px; }
+  textarea { width: 100%; min-height: 260px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+  button.btn { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 6px 14px; cursor: pointer; font-weight: 600; }
+  button.ghost { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  .subtabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .subtabs button.active { border-color: var(--accent); color: #79c0ff; }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 11.5px; overflow: auto; max-height: 420px; margin: 6px 0; white-space: pre-wrap; word-break: break-word; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .err { border: 1px solid var(--bad); background: rgba(248,81,73,.08); border-radius: 8px; padding: 10px; margin: 8px 0; font-size: 13px; }
+  .err code { color: #ffa198; }
+  .api-log { max-height: calc(100vh - 170px); overflow-y: auto; }
+  .api-item { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .api-item .meta { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
+  .api-item pre { margin: 4px 0; max-height: 120px; }
+  .copy { font-size: 11px; padding: 1px 8px; }
+  aside { position: sticky; top: 10px; align-self: start; }
+  #drawer { position: fixed; top: 0; right: 0; width: min(640px, 100vw); height: 100vh; background: var(--panel); border-left: 1px solid var(--border); transform: translateX(100%); transition: transform .2s; z-index: 10; display: flex; flex-direction: column; }
+  #drawer.open { transform: none; }
+  #drawer .head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  #drawer .body { padding: 14px 16px; overflow-y: auto; flex: 1; }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 4px 10px; font-size: 13px; margin-bottom: 10px; }
+  .kv div:nth-child(odd) { color: var(--muted); }
+  .finding { border-left: 3px solid var(--bad); padding: 4px 10px; margin: 6px 0; background: var(--panel2); border-radius: 0 6px 6px 0; font-size: 13px; }
+  .bar-legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .bar-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .hbar { display: grid; grid-template-columns: 170px 1fr 40px; gap: 8px; align-items: center; font-size: 12.5px; margin: 5px 0; }
+  .hbar .track { background: var(--panel2); border-radius: 4px; height: 12px; } .hbar .fill { background: var(--accent); height: 12px; border-radius: 4px; }
+  .hidden { display: none; }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .grid2 { grid-template-columns: 1fr; } aside { position: static; } }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>Zscaler</span> Endpoint AI Security</h1>
+  <div class="pill" id="pill-mode">Mode: <b>…</b></div>
+  <div class="pill">Region: <b id="pill-region">…</b></div>
+  <div class="pill">Access: <b>read-only</b></div>
+  <div class="pill">Window:
+    <select id="days" aria-label="Time window"><option value="1">1 day</option><option value="7" selected>7 days</option><option value="30">30 days</option></select>
+  </div>
+</header>
+<nav id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="inventory">AI inventory</button>
+  <button data-tab="events">Threat events</button>
+  <button data-tab="devices">Devices</button>
+  <button data-tab="policies">Policies</button>
+</nav>
+
+<div class="layout">
+  <main id="view"></main>
+  <aside class="card">
+    <h2>API explorer <button class="ghost copy" id="clear-log">clear</button></h2>
+    <div class="muted" style="margin-bottom:8px">Every call this page makes, as curl. Set <code>$API</code> and <code>$TOKEN</code> first — the secret is never shown.</div>
+    <pre id="token-curl"></pre>
+    <div class="filters" style="margin-top:8px">
+      <input id="free-path" placeholder="/v1/agents/summary?days=7" style="flex:1">
+      <button class="btn" id="free-go">GET</button>
+    </div>
+    <div class="api-log" id="api-log"></div>
+  </aside>
+</div>
+
+<div id="drawer" role="dialog" aria-modal="true">
+  <div class="head"><b id="drawer-title">Detail</b><button class="ghost" id="drawer-close">Close</button></div>
+  <div class="body" id="drawer-body"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const days = () => $("days").value;
+const state = { tab: "overview", invKind: "ai_assistants", evFilters: {}, evCursors: [""], evPage: 0 };
+
+// ---------------------------------------------------------------- API + explorer
+async function api(path, params = {}, body) {
+  const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== "" && v != null)).toString();
+  const url = "/api/zsai" + path + (qs ? "?" + qs : "");
+  const r = await fetch(url, body ? {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)} : {});
+  let j; try { j = await r.json(); } catch { j = {ok: false, status: r.status, error: "bad_response", message: "Non-JSON response"}; }
+  logCall(body ? "POST" : "GET", path, j);
+  if (!j.ok) throw j;
+  return j.data;
+}
+
+function logCall(method, path, j) {
+  const d = document.createElement("div");
+  d.className = "api-item";
+  const status = j.ok ? `<span class="badge b-ok">200</span>` : `<span class="badge b-bad">${esc(j.status)} ${esc(j.error)}</span>`;
+  d.innerHTML = `<div class="meta"><span>${status} ${esc(method)} ${esc(path)}</span><span>${esc(j.ms ?? "")} ms</span></div>
+    ${j.curl ? `<pre>${esc(j.curl)}</pre><button class="ghost copy">copy curl</button>` : ""}
+    ${j.request_id ? `<div class="muted">request_id: <code>${esc(j.request_id)}</code></div>` : ""}`;
+  d.querySelector(".copy")?.addEventListener("click", () => navigator.clipboard?.writeText(j.curl));
+  $("api-log").prepend(d);
+  while ($("api-log").children.length > 40) $("api-log").lastChild.remove();
+}
+
+function errBox(e) {
+  if (e instanceof Error) e = {error: "client_error", message: e.message};
+  return `<div class="err"><b>API error</b> <code>${esc(e.status ?? "")} ${esc(e.error)}</code><br>${esc(e.message || "")}
+    ${e.request_id ? `<br><span class="muted">request_id:</span> <code>${esc(e.request_id)}</code>` : ""}</div>`;
+}
+
+// ---------------------------------------------------------------- helpers
+function itemsOf(data) {
+  if (Array.isArray(data)) return data;
+  if (!data || typeof data !== "object") return [];
+  for (const k of ["items", "data", "results", "events", "devices", "policies", "rows"]) if (Array.isArray(data[k])) return data[k];
+  const firstArr = Object.values(data).find(Array.isArray);
+  return firstArr || [];
+}
+
+function verdictBadge(v) {
+  if (v == null || v === "") return `<span class="badge b-unk" title="No verdict yet: this artifact has not been scanned. That does not mean it is clean.">Not scanned</span>`;
+  const s = String(v).toLowerCase();
+  const cls = ["block", "deny", "blocked", "denied"].includes(s) ? "b-bad" : ["audit", "warn", "detect"].includes(s) ? "b-warn" : ["allow", "allowed", "clean"].includes(s) ? "b-ok" : "b-info";
+  return `<span class="badge ${cls}">${esc(s.toUpperCase())}</span>`;
+}
+function sevBadge(v) {
+  if (v == null || v === "") return `<span class="badge b-unk">—</span>`;
+  const s = String(v).toLowerCase();
+  const cls = {critical: "b-crit", high: "b-bad", medium: "b-warn", low: "b-ok", info: "b-info"}[s] || (s === "unknown" ? "b-unk" : "b-info");
+  return `<span class="badge ${cls}">${esc(s)}</span>`;
+}
+const fmtCell = (v) => v == null ? "" : Array.isArray(v) ? esc(v.map(x => typeof x === "object" ? JSON.stringify(x) : x).join(", "))
+  : typeof v === "object" ? `<code>${esc(JSON.stringify(v).slice(0, 80))}</code>` : esc(String(v).slice(0, 120));
+
+// Generic table: cols = [[key, label, renderFn?]]; if cols omitted, derive from data.
+function table(rows, cols, onClick) {
+  if (!rows.length) return `<div class="muted">No results.</div>`;
+  if (!cols) {
+    const keys = [...new Set(rows.slice(0, 20).flatMap(Object.keys))].filter(k => !["findings", "rules", "tool_input"].includes(k)).slice(0, 9);
+    cols = keys.map(k => [k, k]);
+  }
+  const head = cols.map(c => `<th>${esc(c[1])}</th>`).join("");
+  const body = rows.map((r, i) => `<tr class="${onClick ? "click" : ""}" data-i="${i}">${cols.map(([k, , fn]) => `<td>${fn ? fn(r[k], r) : fmtCell(r[k])}</td>`).join("")}</tr>`).join("");
+  const id = "t" + Math.random().toString(36).slice(2);
+  setTimeout(() => { if (onClick) document.querySelectorAll(`#${id} tr.click`).forEach(tr => tr.onclick = () => onClick(rows[tr.dataset.i])); });
+  return `<div class="tablewrap"><table id="${id}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+function openDrawer(title, html) { $("drawer-title").textContent = title; $("drawer-body").innerHTML = html; $("drawer").classList.add("open"); }
+$("drawer-close").onclick = () => $("drawer").classList.remove("open");
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
+
+function kvBlock(obj, skip = []) {
+  return `<div class="kv">${Object.entries(obj).filter(([k, v]) => !skip.includes(k) && (typeof v !== "object" || v === null || Array.isArray(v) && v.every(x => typeof x !== "object")))
+    .map(([k, v]) => `<div>${esc(k)}</div><div>${k === "verdict" ? verdictBadge(v) : ["severity", "risk"].includes(k) ? sevBadge(v) : fmtCell(v)}</div>`).join("")}</div>`;
+}
+function findingsBlock(f) {
+  if (!f || !f.length) return "";
+  return `<h3 style="font-size:13px">Findings</h3>` + f.map(x => `<div class="finding">${sevBadge(x.severity)} <b>${esc(x.type)}</b>
+    ${x.owasp ? `<span class="badge b-info">${esc(x.owasp)}</span>` : ""} ${x.atlas ? `<span class="badge b-info">${esc(x.atlas)}</span>` : ""}<br>${esc(x.detail || "")}</div>`).join("");
+}
+const rawBlock = (d) => `<details open><summary class="muted">Raw JSON</summary><pre>${esc(JSON.stringify(d, null, 2))}</pre></details>`;
+
+// ---------------------------------------------------------------- views
+const views = {};
+
+views.overview = async (el) => {
+  el.innerHTML = `<div class="card"><h2>Key metrics</h2><div id="kpis" class="muted">Loading…</div></div>
+    <div class="card"><h2>AI agent events per day</h2><div id="ts" class="muted">Loading…</div></div>
+    <div class="grid2"><div class="card"><h2>Device fleet</h2><div id="dstats" class="muted">Loading…</div></div>
+    <div class="card"><h2>Top risks</h2><div id="risk" class="muted">Loading…</div></div></div>`;
+  const d = {days: days()};
+  const load = async (id, fn) => { try { $(id).innerHTML = await fn(); $(id).classList.remove("muted"); } catch (e) { $(id).innerHTML = errBox(e); } };
+  load("kpis", async () => {
+    const k = await api("/v1/overview/kpis", d);
+    const flat = Object.entries(k).filter(([, v]) => typeof v === "number" || typeof v === "string");
+    return `<div class="kpis">${flat.map(([n, v]) => `<div class="kpi"><div class="v">${esc(typeof v === "number" ? v.toLocaleString() : v)}</div><div class="l">${esc(n.replace(/_/g, " "))}</div></div>`).join("")}</div>`;
+  });
+  load("ts", async () => chart(itemsOf(await api("/v1/overview/timeseries", d))));
+  load("dstats", async () => {
+    const s = await api("/v1/devices/stats");
+    return kvBlock(s) + Object.entries(s).filter(([, v]) => v && typeof v === "object" && !Array.isArray(v))
+      .map(([k, v]) => `<div class="muted" style="margin-top:6px">${esc(k.replace(/_/g, " "))}</div>` + hbars(Object.entries(v).map(([n, c]) => ({name: n, count: c})))).join("");
+  });
+  load("risk", async () => table(itemsOf(await api("/v1/overview/risk", d)),
+    [["name", "Artifact"], ["risk", "Risk", sevBadge], ["verdict", "Verdict", verdictBadge], ["reason", "Why"]],
+    r => r.kind && r.asset_key ? showArtifact(r.kind, r.asset_key) : openDrawer(r.name || "Risk", kvBlock(r) + rawBlock(r))));
+};
+
+function chart(series) {
+  if (!series.length) return `<div class="muted">No data.</div>`;
+  const keys = ["deny", "audit", "allow"].filter(k => series.some(s => typeof s[k] === "number"));
+  const colors = {deny: "var(--bad)", audit: "var(--warn)", allow: "#2f81f7"};
+  const totalOf = s => keys.length ? keys.reduce((a, k) => a + (s[k] || 0), 0) : (s.total || s.count || 0);
+  const max = Math.max(1, ...series.map(totalOf));
+  const W = 720, H = 180, pad = 24, bw = (W - pad) / series.length;
+  let bars = "";
+  series.forEach((s, i) => {
+    let y = H - pad;
+    const x = pad + i * bw + 2;
+    const segs = keys.length ? keys : ["total"];
+    [...segs].reverse().forEach(k => {
+      const h = ((keys.length ? s[k] : totalOf(s)) || 0) / max * (H - pad - 8);
+      y -= h;
+      bars += `<rect x="${x}" y="${y}" width="${Math.max(bw - 4, 2)}" height="${h}" fill="${colors[k] || "#2f81f7"}"><title>${esc(s.ts)} ${esc(k)}: ${esc(s[k] ?? totalOf(s))}</title></rect>`;
+    });
+    if (i % Math.ceil(series.length / 7) === 0) bars += `<text x="${x}" y="${H - 6}" font-size="10" fill="#8b949e">${esc(String(s.ts).slice(5, 10))}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Events per day">
+    <text x="0" y="12" font-size="10" fill="#8b949e">${max}</text>${bars}</svg>
+    <div class="bar-legend">${keys.map(k => `<span><i style="background:${colors[k]}"></i>${esc(k)}</span>`).join("")}</div>`;
+}
+function hbars(rows) {
+  const max = Math.max(1, ...rows.map(r => r.count || 0));
+  return rows.map(r => `<div class="hbar"><span title="${esc(r.name)}">${esc(r.id ? r.id + " " : "")}${esc(r.name)}</span><div class="track"><div class="fill" style="width:${(r.count || 0) / max * 100}%"></div></div><span>${esc(r.count)}</span></div>`).join("");
+}
+
+const INV = [
+  ["ai_assistants", "AI assistants & agents", "/v1/ai_assistants", null],
+  ["mcp-servers", "MCP servers", "/v1/agents/mcp-servers", "mcp-servers"],
+  ["skills", "Skills", "/v1/agents/skills", "skills"],
+  ["plugins", "Plugins", "/v1/agents/plugins", "plugins"],
+  ["hooks", "Hooks", "/v1/agents/hooks", "hooks"],
+  ["models", "Models", "/v1/models", null],
+  ["extensions", "Extensions", "/v1/extensions", null],
+];
+views.inventory = async (el) => {
+  el.innerHTML = `<div class="card"><h2>AI inventory summary</h2><div id="invsum" class="muted">Loading…</div></div>
+    <div class="card"><h2>Discovered artifacts <input id="invq" placeholder="search…" style="width:180px"></h2>
+    <div class="subtabs">${INV.map(([k, label]) => `<button class="ghost ${k === state.invKind ? "active" : ""}" data-k="${esc(k)}">${esc(label)}</button>`).join("")}</div>
+    <div class="muted" style="margin-bottom:6px"><span class="badge b-unk">Not scanned</span> = no verdict yet. It has not been checked, so do not treat it as clean.</div>
+    <div id="invlist" class="muted">Loading…</div></div>`;
+  api("/v1/agents/summary", {days: days()}).then(s => { $("invsum").classList.remove("muted"); $("invsum").innerHTML = `<div class="kpis">${Object.entries(s).filter(([, v]) => typeof v === "number")
+    .map(([k, v]) => `<div class="kpi"><div class="v">${esc(v)}</div><div class="l">${esc(k.replace(/_/g, " "))}</div></div>`).join("")}</div>`; }).catch(e => $("invsum").innerHTML = errBox(e));
+  el.querySelectorAll(".subtabs button").forEach(b => b.onclick = () => { state.invKind = b.dataset.k; views.inventory(el); });
+  const [, , path, kind] = INV.find(x => x[0] === state.invKind);
+  const loadList = async () => {
+    try {
+      const params = {days: days(), limit: 50, q: $("invq").value};
+      if (["/v1/extensions"].includes(path)) params.view = "page";
+      const rows = itemsOf(await api(path, params));
+      $("invlist").classList.remove("muted");
+      const nameKey = rows[0] && ("name" in rows[0] ? "name" : Object.keys(rows[0])[0]);
+      const extra = rows.length ? Object.keys(rows[0]).filter(k => !["name", "asset_key", "verdict", "risk", "findings", "last_seen"].includes(k)).slice(0, 4) : [];
+      $("invlist").innerHTML = table(rows, [[nameKey, "Name"], ["verdict", "Verdict", verdictBadge], ["risk", "Risk", sevBadge],
+        ...extra.map(k => [k, k.replace(/_/g, " ")]), ["findings", "Findings", f => f && f.length ? `<span class="badge b-bad">${f.length}</span>` : ""]],
+        r => kind && r.asset_key ? showArtifact(kind, r.asset_key) : openDrawer(r.name || "Artifact", kvBlock(r) + findingsBlock(r.findings) + rawBlock(r)));
+    } catch (e) { $("invlist").innerHTML = errBox(e); }
+  };
+  let t; $("invq").oninput = () => { clearTimeout(t); t = setTimeout(loadList, 300); };
+  loadList();
+};
+
+async function showArtifact(kind, key) {
+  openDrawer("Loading…", "");
+  try {
+    const d = await api(`/v1/agents/detail/${encodeURIComponent(kind)}/${encodeURIComponent(key)}`, {days: days()});
+    openDrawer(d.name || key, kvBlock(d, ["findings"]) + findingsBlock(d.findings) + rawBlock(d));
+  } catch (e) { openDrawer("Error", errBox(e)); }
+}
+
+const EV_FILTERS = [["ef_verdict", "Verdict", ["deny", "audit", "allow"]], ["ef_severity", "Severity", ["critical", "high", "medium", "low", "info"]],
+  ["ef_owasp", "OWASP", ["LLM01", "LLM02", "LLM03", "LLM06"]], ["ef_atlas", "ATLAS", ["AML.T0051", "AML.T0053", "AML.T0055", "AML.T0025", "AML.T0010"]]];
+views.events = async (el) => {
+  el.innerHTML = `<div class="grid2"><div class="card"><h2>OWASP LLM Top 10</h2><div id="owasp" class="muted">Loading…</div></div>
+    <div class="card"><h2>MITRE ATLAS</h2><div id="atlas" class="muted">Loading…</div></div></div>
+    <div class="card"><h2>Threat events</h2>
+    <div class="filters">${EV_FILTERS.map(([k, label, opts]) => `<select data-f="${k}" aria-label="${label}"><option value="">${label}: any</option>${opts.map(o => `<option ${state.evFilters[k] === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`).join("")}
+      <input data-f="user" placeholder="user" value="${esc(state.evFilters.user || "")}"><input data-f="host" placeholder="host" value="${esc(state.evFilters.host || "")}">
+      <button class="btn" id="ev-apply">Apply</button><button class="ghost" id="ev-reset">Reset</button></div>
+    <div id="evlist" class="muted">Loading…</div>
+    <div class="filters" style="margin-top:10px"><button class="ghost" id="ev-prev">← Prev</button><button class="ghost" id="ev-next">Next →</button><span class="muted" id="ev-page"></span></div></div>`;
+  api("/v1/events/pattern-summary", {days: days()}).then(p => {
+    for (const k of ["owasp", "atlas"]) { $(k).classList.remove("muted"); $(k).innerHTML = hbars(itemsOf(p[k] ?? [])) || `<div class="muted">No data.</div>`; }
+  }).catch(e => { $("owasp").innerHTML = errBox(e); $("atlas").innerHTML = ""; });
+  $("ev-apply").onclick = () => { el.querySelectorAll("[data-f]").forEach(i => state.evFilters[i.dataset.f] = i.value); state.evCursors = [""]; state.evPage = 0; loadEvents(); };
+  $("ev-reset").onclick = () => { state.evFilters = {}; state.evCursors = [""]; state.evPage = 0; views.events(el); };
+  $("ev-prev").onclick = () => { if (state.evPage > 0) { state.evPage--; loadEvents(); } };
+  $("ev-next").onclick = () => { if (state.evCursors[state.evPage + 1]) { state.evPage++; loadEvents(); } };
+  loadEvents();
+};
+async function loadEvents() {
+  try {
+    const data = await api("/v1/events", {days: days(), limit: 15, cursor: state.evCursors[state.evPage], ...state.evFilters});
+    state.evCursors[state.evPage + 1] = data.next_cursor || "";
+    $("evlist").classList.remove("muted");
+    $("evlist").innerHTML = table(itemsOf(data), [["ts", "Time", v => esc(String(v || "").replace("T", " ").slice(0, 19))], ["verdict", "Verdict", verdictBadge],
+      ["severity", "Severity", sevBadge], ["event", "Hook event"], ["tool", "Tool"], ["client", "Client"], ["user", "User"], ["summary", "Summary"],
+      ["owasp", "OWASP / ATLAS", (v, r) => [...(r.owasp || []), ...(r.atlas || [])].map(x => `<span class="badge b-info">${esc(x)}</span>`).join(" ")],
+      ["partial", "", v => v ? `<span class="badge b-unk" title="Large fields trimmed; open for full detail">partial</span>` : ""]], showEvent);
+    $("ev-page").textContent = `Page ${state.evPage + 1}${data.next_cursor ? "" : " (last)"}`;
+    $("ev-prev").disabled = state.evPage === 0; $("ev-next").disabled = !data.next_cursor;
+  } catch (e) { $("evlist").innerHTML = errBox(e); }
+}
+async function showEvent(ev) {
+  let d = ev;
+  if (ev.partial || !ev.tool_input) {
+    try { d = await api("/v1/events/detail", {id: ev.id}); } catch (e) { return openDrawer("Event " + ev.id, errBox(e) + rawBlock(ev)); }
+  }
+  openDrawer("Event " + (d.id || ""), kvBlock(d) + (d.tool_input ? `<h3 style="font-size:13px">Tool input</h3><pre>${esc(JSON.stringify(d.tool_input, null, 2))}</pre>` : "")
+    + (d.prompt_excerpt ? `<h3 style="font-size:13px">Prompt excerpt</h3><pre>${esc(d.prompt_excerpt)}</pre>` : "") + rawBlock(d));
+}
+
+views.devices = async (el) => {
+  el.innerHTML = `<div class="card"><h2>Devices</h2><div class="filters">
+    <select id="d-status" aria-label="Status"><option value="">Status: any</option><option>online</option><option>offline</option></select>
+    <select id="d-health" aria-label="Health"><option value="">Health: any</option><option>healthy</option><option>degraded</option></select>
+    <select id="d-os" aria-label="OS"><option value="">OS: any</option><option>macos</option><option>windows</option><option>linux</option></select>
+    <input id="d-email" placeholder="email"><button class="btn" id="d-go">Apply</button></div>
+    <div id="dlist" class="muted">Loading…</div></div>`;
+  const load = async () => {
+    try {
+      const data = await api("/v1/devices", {limit: 50, status: $("d-status").value, health: $("d-health").value, os: $("d-os").value, email: $("d-email").value});
+      $("dlist").classList.remove("muted");
+      $("dlist").innerHTML = `<div class="muted" style="margin-bottom:6px">${esc(data.total ?? itemsOf(data).length)} devices${data.has_more ? " (more available)" : ""}</div>` +
+        table(itemsOf(data), [["hostname", "Host"], ["email", "User"], ["os", "OS"], ["os_version", "Version"],
+          ["status", "Status", v => `<span class="badge ${v === "online" ? "b-ok" : "b-unk"}">${esc(v)}</span>`],
+          ["health", "Health", v => `<span class="badge ${v === "healthy" ? "b-ok" : "b-warn"}">${esc(v)}</span>`],
+          ["agent_mode", "Agent mode"], ["version", "Agent"], ["last_seen", "Last seen", v => esc(String(v || "").replace("T", " ").slice(0, 16))]],
+          async r => { try { const d = await api(`/v1/devices/${encodeURIComponent(r.id)}`); openDrawer(d.hostname || r.id, kvBlock(d) + rawBlock(d)); } catch (e) { openDrawer("Error", errBox(e)); } });
+    } catch (e) { $("dlist").innerHTML = errBox(e); }
+  };
+  $("d-go").onclick = load;
+  load();
+};
+
+const SAMPLE_POLICY = {
+  name: "Demo: block credential reads",
+  rules: [{
+    id: "demo1", ruleType: "tool_guard",
+    match: {any: [{field: "tool_input.file_path", op: "glob", value: "~/.ssh/*"}, {field: "tool_input.file_path", op: "glob", value: "~/.aws/credentials"}]},
+    events: ["PreToolUse"], verdict: "block", reason: "Credential file access", user_message: "Blocked by Zscaler: reading credentials is not allowed.",
+  }],
+};
+views.policies = async (el) => {
+  el.innerHTML = `<div class="card"><h2>Policies</h2><div id="plist" class="muted">Loading…</div></div>
+    <div class="grid2"><div class="card"><h2>Effective policy for a user</h2>
+      <div class="filters"><input id="eff-email" placeholder="user@company.com" value="frank.osei@acme.example" style="flex:1"><button class="btn" id="eff-go">Look up</button></div>
+      <div id="eff"></div></div>
+    <div class="card"><h2>Policy playground <span class="badge b-info">dry run</span></h2>
+      <div class="muted" style="margin-bottom:6px">Calls <code>POST /v1/policies/validate</code> only. Nothing is saved to the tenant.</div>
+      <textarea id="pg" spellcheck="false">${esc(JSON.stringify(SAMPLE_POLICY, null, 2))}</textarea>
+      <div class="filters" style="margin-top:6px"><button class="btn" id="pg-go">Validate</button><button class="ghost" id="pg-bad">Load broken example</button></div>
+      <div id="pg-out"></div></div></div>`;
+  try {
+    const rows = itemsOf(await api("/v1/policies"));
+    $("plist").classList.remove("muted");
+    $("plist").innerHTML = table(rows, [["name", "Name"], ["description", "Description"], ["enabled", "Enabled"], ["version", "Version"],
+      ["rules", "Rules", v => esc(Array.isArray(v) ? v.length : "")], ["updated_at", "Updated", v => esc(String(v || "").slice(0, 10))]], showPolicy);
+  } catch (e) { $("plist").innerHTML = errBox(e); }
+  $("eff-go").onclick = async () => {
+    try {
+      const d = await api("/v1/policies/effective", {email: $("eff-email").value.trim()});
+      $("eff").innerHTML = (d.policies ? `<div style="margin:6px 0">${d.policies.map(p => `<span class="badge b-info">${esc(p.name || p.id)}</span>`).join(" ")}</div>` : "")
+        + rulesTable(d.rules || []) + rawBlock(d);
+    } catch (e) { $("eff").innerHTML = errBox(e); }
+  };
+  $("pg-bad").onclick = () => { $("pg").value = JSON.stringify({name: "broken", rules: [{id: "x", ruleType: "tool_guard", verdict: "deny"}]}, null, 2); };
+  $("pg-go").onclick = async () => {
+    let body;
+    try { body = JSON.parse($("pg").value); } catch (e) { $("pg-out").innerHTML = errBox({error: "invalid_json", message: e.message}); return; }
+    try {
+      const d = await api("/v1/policies/validate", {}, body);
+      const ok = d.valid ?? d.ok ?? !(d.errors && d.errors.length);
+      $("pg-out").innerHTML = `<div style="margin:8px 0">${ok ? `<span class="badge b-ok">VALID</span>` : `<span class="badge b-bad">INVALID</span>`}</div>`
+        + (d.errors && d.errors.length ? table(d.errors) : "") + rawBlock(d);
+    } catch (e) { $("pg-out").innerHTML = errBox(e); }
+  };
+};
+function rulesTable(rules) {
+  return table(rules, [["id", "ID"], ["ruleType", "Type"], ["events", "Events"], ["match", "Match", v => `<code>${esc(JSON.stringify(v))}</code>`],
+    ["verdict", "Verdict", verdictBadge], ["reason", "Reason"]]);
+}
+async function showPolicy(p) {
+  try {
+    const d = await api(`/v1/policies/${encodeURIComponent(p.id)}`);
+    openDrawer(d.name || p.id, kvBlock(d) + `<h3 style="font-size:13px">Rules</h3>` + rulesTable(d.rules || []) + rawBlock(d));
+  } catch (e) { openDrawer("Error", errBox(e)); }
+}
+
+// ---------------------------------------------------------------- shell
+function show(tab) {
+  state.tab = tab;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  views[tab]($("view"));
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => show(b.dataset.tab));
+$("days").onchange = () => show(state.tab);
+$("clear-log").onclick = () => $("api-log").innerHTML = "";
+$("free-go").onclick = async () => {
+  const raw = $("free-path").value.trim() || "/v1/agents/summary?days=7";
+  const u = new URL(raw.startsWith("/") ? raw : "/" + raw, location.origin);
+  try { const d = await api(u.pathname, Object.fromEntries(u.searchParams)); openDrawer("GET " + u.pathname, rawBlock(d)); }
+  catch (e) { openDrawer("GET " + u.pathname, errBox(e)); }
+};
+
+(async () => {
+  const s = await (await fetch("/api/status")).json();
+  $("pill-mode").className = "pill " + s.mode;
+  $("pill-mode").innerHTML = `Mode: <b>${esc(s.mode.toUpperCase())}</b>`;
+  $("pill-region").textContent = s.region;
+  $("token-curl").textContent = `export API=${s.api}\nexport TOKEN=$(curl -s -X POST "${s.id}/v1/auth/token" \\\n  -u "$CLIENT_ID:$CLIENT_SECRET" | jq -r .access_token)`;
+  show("overview");
+})();
+</script>
+</body>
+</html>
