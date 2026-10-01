@@ -13,3 +13,4 @@ Result values: **worked** / **not tested** / **failed**.
 | 2026-09-30 | pytest suite: 53 tests | worked | `.venv/bin/python -m pytest -q` |
 | 2026-09-30 | `run.sh`, `Dockerfile`, `.env.example`, README with 5-minute demo script | worked (run.sh) / not tested (Docker) | run.sh tested; Docker not built here. |
 | 2026-09-30 | **Live mode against a real tenant** | not tested yet | Needs your CLIENT_ID/CLIENT_SECRET. Docs host was blocked from the build env, so live response shapes may differ from mock; the UI renders them generically. |
+| 2026-10-01 | Push branch `feature/zsai-endpoint-demo` to GitHub | worked | The first two pushes failed with 403. The Claude GitHub App was already installed on All repositories, and the next retry succeeded. |
