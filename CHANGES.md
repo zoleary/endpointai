@@ -24,3 +24,4 @@
 | 2026-10-01 | `create-policies.sh` dry run | worked | All 4 policies `{"valid":true,"errors":[]}` |
 | 2026-10-01 | `create-policies.sh --apply` | worked | Created Lab 01 (id 1256), Lab 02 (1257), Lab 03 (1258), Lab 04 (1259). First body shape accepted, no fallback needed |
 | 2026-10-01 | Talk track published as a Google Doc with copy-paste command boxes | worked | "Zscaler AI Endpoint Security Demo Talk Track" in Google Drive; line breaks in boxes verified via plain-text export |
+| 2026-10-01 | Test plan published as a Google Doc (copy-paste boxes, Result columns, setup steps S3–S6 and S8 marked Pass) | worked | "Zscaler AI Endpoint Security Lab Test Plan" in Google Drive |
