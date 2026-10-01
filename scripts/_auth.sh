@@ -1,4 +1,5 @@
 # Sourced by the other scripts. Needs CLIENT_ID and CLIENT_SECRET exported (or in ../.env).
+if [ -z "${BASH_VERSION:-}" ]; then echo "Run the script directly (e.g. scripts/snapshot.sh); do not source it."; return 1 2>/dev/null || exit 1; fi
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -z "${CLIENT_SECRET:-}" ] && [ -f "$HERE/../.env" ]; then set -a; . "$HERE/../.env"; set +a; fi
