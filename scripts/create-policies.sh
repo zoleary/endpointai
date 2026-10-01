@@ -21,13 +21,22 @@ for f in "$ROOT"/policies/0[1-4]-*.json; do
           else ("WARNING: built-in pattern \($m.pattern_id) not found, skipped\n" | stderr | empty) end
       else . end)' "$f" > "$out"
   printf '\n== %s\n' "$name"
-  curl -s -X POST "$API/v1/policies/validate" -H "$H" -H "Content-Type: application/json" --data @"$out" \
-    | jq -c 'del(.version) | if (.error|not) and (.valid|not) then {response: .} else . end'
+  # The validator takes only {"rules": [ ... ]} (found with scripts/probe-validate.sh).
+  jq -c '{rules: .rules.rules}' "$out" \
+    | curl -s -X POST "$API/v1/policies/validate" -H "$H" -H "Content-Type: application/json" --data @- \
+    | jq -c 'del(.version)'
   if [ "$APPLY" = "--apply" ]; then
     read -r -p "Create \"$name\" in your tenant? [y/N] " ok
     if [ "$ok" = "y" ]; then
-      curl -s -X POST "$API/v1/policies" -H "$H" -H "Content-Type: application/json" --data @"$out" \
-        | jq -c '{id, name, error, message, request_id} | with_entries(select(.value != null))'
+      # Same shape the API returns on GET. If the body shape is rejected (nothing is created),
+      # retry once with a flat rules array.
+      res=$(curl -s -X POST "$API/v1/policies" -H "$H" -H "Content-Type: application/json" --data @"$out")
+      if echo "$res" | jq -e '.message == "invalid request body"' >/dev/null 2>&1; then
+        echo "  shape 1 rejected (nothing created), trying flat rules array"
+        res=$(jq -c '{name, enabled, description: .rules.description, rules: .rules.rules}' "$out" \
+          | curl -s -X POST "$API/v1/policies" -H "$H" -H "Content-Type: application/json" --data @-)
+      fi
+      echo "$res" | jq -c '{id, name, error, message, request_id} | with_entries(select(.value != null))'
     else
       echo "skipped"
     fi
