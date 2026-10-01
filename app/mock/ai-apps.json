@@ -1,0 +1,89 @@
+{
+  "AI assistants": {
+    "items": [
+      {
+        "name": "Claude Code",
+        "category": "coding agent",
+        "users": 3,
+        "hosts": 3,
+        "risk": "medium"
+      },
+      {
+        "name": "Cursor",
+        "category": "IDE agent",
+        "users": 2,
+        "hosts": 2,
+        "risk": "medium"
+      },
+      {
+        "name": "GitHub Copilot",
+        "category": "IDE assistant",
+        "users": 2,
+        "hosts": 2,
+        "risk": "low"
+      },
+      {
+        "name": "Ollama",
+        "category": "local model runtime",
+        "users": 1,
+        "hosts": 1,
+        "risk": "high"
+      }
+    ]
+  },
+  "Models": {
+    "items": [
+      {
+        "model": "claude-sonnet",
+        "provider": "anthropic",
+        "requests": 2210,
+        "users": 3
+      },
+      {
+        "model": "gpt-5",
+        "provider": "openai",
+        "requests": 640,
+        "users": 2
+      },
+      {
+        "model": "llama3:8b",
+        "provider": "local (ollama)",
+        "requests": 85,
+        "users": 1
+      }
+    ]
+  },
+  "Applications": {
+    "items": [
+      {
+        "name": "ChatGPT Desktop",
+        "users": 2
+      },
+      {
+        "name": "Claude Desktop",
+        "users": 3
+      },
+      {
+        "name": "Perplexity",
+        "users": 1
+      }
+    ]
+  },
+  "Browser extensions": {
+    "items": [
+      {
+        "name": "AI Summarizer Pro",
+        "browser": "Chrome",
+        "users": 1,
+        "verdict": "suspicious",
+        "permissions": "read all sites"
+      },
+      {
+        "name": "Grammarly",
+        "browser": "Chrome",
+        "users": 2,
+        "verdict": "clean"
+      }
+    ]
+  }
+}

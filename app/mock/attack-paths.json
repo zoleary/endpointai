@@ -1,0 +1,50 @@
+{
+  "Risk graph": {
+    "nodes": [
+      {
+        "id": "alice-mbp",
+        "type": "host"
+      },
+      {
+        "id": "Claude Code",
+        "type": "agent"
+      },
+      {
+        "id": "weather-free-api",
+        "type": "mcp"
+      },
+      {
+        "id": "~/.aws/credentials",
+        "type": "secret"
+      }
+    ],
+    "edges": [
+      [
+        "alice-mbp",
+        "Claude Code"
+      ],
+      [
+        "Claude Code",
+        "weather-free-api"
+      ],
+      [
+        "weather-free-api",
+        "~/.aws/credentials"
+      ]
+    ]
+  },
+  "MCP attack flow": {
+    "flows": [
+      {
+        "server": "weather-free-api",
+        "technique": "tool poisoning",
+        "steps": [
+          "tool description injects instruction",
+          "agent reads secrets",
+          "agent calls tool with secret as argument"
+        ],
+        "blocked_at": "step 2"
+      }
+    ]
+  }
+}

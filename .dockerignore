@@ -1,0 +1,9 @@
+.env
+.git
+tests
+docs
+endpoint-kit
+policies
+scripts
+*.zip
+__pycache__

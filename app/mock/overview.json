@@ -1,0 +1,37 @@
+{
+  "KPIs": {
+    "events_total": 4898,
+    "hook_events_total": 4898,
+    "users_active": 4,
+    "hosts_active": 3,
+    "sessions_total": 163,
+    "high_severity_count": 0,
+    "risk_score_avg": 1.68
+  },
+  "Risk": {
+    "top_users": [
+      {
+        "user": "alice@demo.lab",
+        "risk": 4.2
+      },
+      {
+        "user": "bob@demo.lab",
+        "risk": 2.1
+      },
+      {
+        "user": "carol@demo.lab",
+        "risk": 0.9
+      }
+    ],
+    "top_hosts": [
+      {
+        "host": "alice-mbp",
+        "risk": 4.0
+      },
+      {
+        "host": "build-01",
+        "risk": 1.8
+      }
+    ]
+  }
+}

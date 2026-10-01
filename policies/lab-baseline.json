@@ -1,0 +1,54 @@
+{
+  "name": "Lab - Baseline guardrails",
+  "description": "Demo policy for the AI Endpoint lab. TEMPLATE: field names under 'match' are placeholders; check them against GET /v1/policies/patterns or a rule exported from the console, then dry-run with scripts/validate-policy.sh.",
+  "rules": [
+    {
+      "id": "block-secrets-read",
+      "ruleType": "tool",
+      "match": { "any": [
+        { "field": "tool_input.command", "op": "matches", "value": "(cat|less|head|tail|grep).*(\\.env|id_rsa|\\.aws/credentials)" },
+        { "field": "tool_input.file_path", "op": "matches", "value": "(\\.env$|id_rsa|\\.aws/credentials)" }
+      ]},
+      "events": ["PreToolUse"],
+      "verdict": "block",
+      "reason": "Agent tried to read a secrets file",
+      "user_message": "Blocked by Zscaler: AI agents may not read secrets files (.env, SSH keys, cloud credentials)."
+    },
+    {
+      "id": "block-curl-pipe-shell",
+      "ruleType": "tool",
+      "match": { "field": "tool_input.command", "op": "matches", "value": "(curl|wget)[^|]*\\|\\s*(sh|bash|zsh)" },
+      "events": ["PreToolUse"],
+      "verdict": "block",
+      "reason": "Remote script piped to a shell",
+      "user_message": "Blocked by Zscaler: piping a downloaded script into a shell is not allowed."
+    },
+    {
+      "id": "block-rm-rf",
+      "ruleType": "tool",
+      "match": { "field": "tool_input.command", "op": "matches", "value": "rm\\s+-[a-zA-Z]*r[a-zA-Z]*f|rm\\s+-[a-zA-Z]*f[a-zA-Z]*r" },
+      "events": ["PreToolUse"],
+      "verdict": "block",
+      "reason": "Recursive force delete",
+      "user_message": "Blocked by Zscaler: recursive force-delete needs a human."
+    },
+    {
+      "id": "audit-git-force-push",
+      "ruleType": "tool",
+      "match": { "field": "tool_input.command", "op": "matches", "value": "git\\s+push.*(--force|-f\\b)" },
+      "events": ["PreToolUse"],
+      "verdict": "audit",
+      "reason": "Force push by an AI agent",
+      "user_message": "Logged by Zscaler: force push by an AI agent."
+    },
+    {
+      "id": "audit-package-install",
+      "ruleType": "tool",
+      "match": { "field": "tool_input.command", "op": "matches", "value": "(npm|pnpm|yarn)\\s+(i|install|add)|pip3?\\s+install" },
+      "events": ["PreToolUse"],
+      "verdict": "audit",
+      "reason": "Agent installing packages",
+      "user_message": "Logged by Zscaler: package install by an AI agent."
+    }
+  ]
+}

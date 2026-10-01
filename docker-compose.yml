@@ -1,0 +1,10 @@
+services:
+  dashboard:
+    build: .
+    container_name: zsai-demo-lab
+    ports:
+      - "127.0.0.1:8080:8080"   # only reachable from this Mac
+    env_file:
+      - path: .env
+        required: false          # no .env = mock data mode
+    restart: unless-stopped

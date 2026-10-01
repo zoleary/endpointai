@@ -1,0 +1,38 @@
+{
+  "OWASP / MITRE ATLAS": {
+    "owasp": [
+      {
+        "id": "LLM01",
+        "name": "Prompt Injection",
+        "count": 12
+      },
+      {
+        "id": "LLM02",
+        "name": "Sensitive Information Disclosure",
+        "count": 21
+      },
+      {
+        "id": "LLM03",
+        "name": "Supply Chain",
+        "count": 6
+      },
+      {
+        "id": "LLM06",
+        "name": "Excessive Agency",
+        "count": 17
+      }
+    ],
+    "atlas": [
+      {
+        "id": "AML.T0051",
+        "name": "LLM Prompt Injection",
+        "count": 12
+      },
+      {
+        "id": "AML.T0057",
+        "name": "LLM Data Leakage",
+        "count": 21
+      }
+    ]
+  }
+}

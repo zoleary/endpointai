@@ -1,0 +1,45 @@
+{
+  "Device stats": {
+    "total": 3,
+    "healthy": 3,
+    "by_os": {
+      "macOS": 2,
+      "Linux": 1
+    },
+    "agent_versions": {
+      "1.8.2": 3
+    }
+  },
+  "Devices": {
+    "devices": [
+      {
+        "host": "alice-mbp",
+        "os": "macOS 15",
+        "user": "alice@demo.lab",
+        "status": "active",
+        "health": "healthy",
+        "agent_mode": "enforce",
+        "version": "1.8.2"
+      },
+      {
+        "host": "bob-mbp",
+        "os": "macOS 15",
+        "user": "bob@demo.lab",
+        "status": "active",
+        "health": "healthy",
+        "agent_mode": "monitor",
+        "version": "1.8.2"
+      },
+      {
+        "host": "build-01",
+        "os": "Ubuntu 24.04",
+        "user": "svc-ci",
+        "status": "active",
+        "health": "healthy",
+        "agent_mode": "enforce",
+        "version": "1.8.2"
+      }
+    ],
+    "total": 3
+  }
+}

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Endpoint Demo Lab</title>
+<style>
+  :root { --bg:#0f1420; --panel:#171e2e; --line:#26304a; --text:#e6e9f0; --muted:#8b93a7; --accent:#2f80ed;
+          --block:#e5484d; --audit:#f5a623; --allow:#30a46c; --unscanned:#8b93a7; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0; }
+  .badge { padding:2px 8px; border-radius:10px; font-size:12px; background:var(--line); }
+  .badge.live { background:var(--allow); color:#fff; } .badge.mock { background:var(--audit); color:#111; }
+  nav { display:flex; gap:6px; padding:10px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  nav button { background:none; border:1px solid var(--line); color:var(--text); padding:6px 12px; border-radius:6px; cursor:pointer; }
+  nav button.on { background:var(--accent); border-color:var(--accent); }
+  main { padding:16px 20px; max-width:1300px; }
+  .blurb { color:var(--muted); margin:0 0 12px; }
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .filters select, .filters input { background:var(--panel); color:var(--text); border:1px solid var(--line); padding:6px; border-radius:6px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:14px; overflow-x:auto; }
+  .panel h2 { font-size:14px; margin:0 0 4px; }
+  .call { font:12px ui-monospace,Menlo,monospace; color:var(--muted); margin-bottom:10px; }
+  .kpis { display:flex; gap:10px; flex-wrap:wrap; }
+  .kpi { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px 12px; min-width:140px; }
+  .kpi b { display:block; font-size:20px; } .kpi > span { color:var(--muted); font-size:12px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  .v-block,.v-deny,.v-malicious { color:var(--block); font-weight:600; }
+  .v-audit,.v-suspicious { color:var(--audit); font-weight:600; }
+  .v-allow,.v-clean { color:var(--allow); }
+  .v-unscanned { color:var(--unscanned); font-style:italic; }
+  .err { color:var(--block); font-family:ui-monospace,Menlo,monospace; font-size:12px; }
+  details summary { cursor:pointer; color:var(--muted); font-size:12px; margin-top:8px; }
+  pre { white-space:pre-wrap; word-break:break-word; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zscaler AI Endpoint Security: Demo Lab</h1>
+  <span id="mode" class="badge">…</span>
+  <label style="margin-left:auto;color:var(--muted)">Window
+    <select id="days"><option>1</option><option>7</option><option selected>30</option><option>90</option></select> days</label>
+</header>
+<nav id="nav"></nav>
+<main>
+  <p id="blurb" class="blurb"></p>
+  <div id="extra"></div>
+  <div id="panels"></div>
+</main>
+<script>
+const SCENES = {
+  "overview":           ["1. Overview", "Where is AI being used, by whom, and how risky is it? These are the headline numbers."],
+  "devices":            ["2. Devices", "A lightweight agent on each laptop or server. Show coverage, health, and monitor vs. enforce mode."],
+  "ai-apps":            ["3. AI apps & models", "Discovery: every AI assistant, desktop app, model and browser extension in use, including shadow AI."],
+  "agent-supply-chain": ["4. Agent supply chain", "What coding agents have been given: MCP servers, skills, plugins and hooks. No verdict means not yet scanned, not clean."],
+  "events":             ["5. Activity & verdicts", "Each agent action (tool call, command, file read) is evaluated in real time: allow, audit or block."],
+  "frameworks":         ["6. OWASP & ATLAS", "Detections are mapped to OWASP LLM Top 10 and MITRE ATLAS, which is useful for risk and compliance teams."],
+  "policies":           ["7. Policies", "Guardrails assigned to users, groups and device groups. Check who gets what with the effective policy lookup."],
+  "attack-paths":       ["8. Attack paths", "How a poisoned MCP server or skill could reach secrets, and where the policy stops it."],
+};
+const $ = s => document.querySelector(s);
+let current = "overview";
+
+function esc(v){ return String(v).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function cell(k, v){
+  if (v === null || v === undefined) return (k === "verdict") ? '<span class="v-unscanned">not scanned</span>' : "";
+  if (typeof v === "object") return esc(JSON.stringify(v));
+  const cls = (k === "verdict" || k === "risk") ? ` class="v-${esc(String(v).toLowerCase())}"` : "";
+  return `<span${cls}>${esc(v)}</span>`;
+}
+function firstArray(d){
+  if (Array.isArray(d)) return d;
+  if (d && typeof d === "object") for (const k of ["items","events","devices","data","results","policies","flows","nodes"]) if (Array.isArray(d[k])) return d[k];
+  return null;
+}
+function render(data){
+  const rows = firstArray(data);
+  if (rows && rows.length && typeof rows[0] === "object") {
+    const keys = [...new Set(rows.flatMap(r => Object.keys(r)))].slice(0, 9);
+    if (!keys.includes("verdict") && rows.some(r => "verdict" in r)) keys.push("verdict");
+    return `<table><tr>${keys.map(k=>`<th>${esc(k)}</th>`).join("")}</tr>` +
+      rows.map(r => `<tr>${keys.map(k=>`<td>${cell(k, r[k])}</td>`).join("")}</tr>`).join("") + "</table>";
+  }
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const flat = Object.entries(data).filter(([,v]) => v === null || typeof v !== "object");
+    const nested = Object.entries(data).filter(([,v]) => v !== null && typeof v === "object");
+    let html = flat.length ? `<div class="kpis">${flat.map(([k,v])=>`<div class="kpi"><b>${cell(k,v)}</b><span>${esc(k.replace(/_/g," "))}</span></div>`).join("")}</div>` : "";
+    for (const [k,v] of nested) html += `<h2 style="margin-top:10px">${esc(k)}</h2>` + render(v);
+    return html || "<em>empty</em>";
+  }
+  if (rows && rows.length) return `<pre>${esc(JSON.stringify(rows, null, 2))}</pre>`;
+  return "<em>No data in this window</em>";
+}
+
+function extras(scene){
+  if (scene === "events") return `<div class="filters">
+    <select id="f-verdict"><option value="">any verdict</option><option>block</option><option>deny</option><option>audit</option><option>allow</option></select>
+    <select id="f-sev"><option value="">any severity</option><option>high</option><option>medium</option><option>low</option></select>
+    <input id="f-user" placeholder="user email"><input id="f-host" placeholder="host">
+    <button onclick="load()">Apply</button></div>`;
+  if (scene === "policies") return `<div class="filters">
+    <input id="eff-email" placeholder="user@company.com" size="28"><button onclick="effective()">Effective policy for user</button></div>
+    <div id="eff-out"></div>`;
+  return "";
+}
+
+async function effective(){
+  const email = $("#eff-email").value.trim(); if (!email) return;
+  const r = await fetch(`/api/effective-policy?email=${encodeURIComponent(email)}`); const j = await r.json();
+  $("#eff-out").innerHTML = `<div class="panel"><h2>Effective policy: ${esc(email)}</h2>` +
+    (j.error ? `<div class="err">${esc(JSON.stringify(j.error))}</div>` : render(j.data)) + "</div>";
+}
+
+async function load(){
+  const q = new URLSearchParams({days: $("#days").value});
+  if (current === "events") {
+    const add = (k, id) => { const el = $(id); if (el && el.value.trim()) q.set(k, el.value.trim()); };
+    add("ef_verdict","#f-verdict"); add("ef_severity","#f-sev"); add("user","#f-user"); add("host","#f-host");
+  }
+  $("#panels").innerHTML = "<p class='blurb'>Loading…</p>";
+  const r = await fetch(`/api/scene/${current}?${q}`); const j = await r.json();
+  $("#panels").innerHTML = j.panels.map(p => `<div class="panel"><h2>${esc(p.label)}</h2>
+    <div class="call">${esc(p.call)} ${esc(new URLSearchParams(p.params).toString())}</div>
+    ${p.error ? `<div class="err">Error: ${esc(p.error.error)} ${p.error.status||""} · request_id: ${esc(p.error.request_id||"n/a")}</div>` : render(p.data)}
+    <details><summary>raw JSON</summary><pre>${esc(JSON.stringify(p.data ?? p.error, null, 2))}</pre></details></div>`).join("");
+}
+
+function show(scene){
+  current = scene;
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.s === scene));
+  $("#blurb").textContent = SCENES[scene][1];
+  $("#extra").innerHTML = extras(scene);
+  load();
+}
+
+(async () => {
+  $("#nav").innerHTML = Object.entries(SCENES).map(([k,[t]]) => `<button data-s="${k}" onclick="show('${k}')">${t}</button>`).join("");
+  $("#days").onchange = load;
+  const s = await (await fetch("/api/status")).json();
+  $("#mode").textContent = s.mode === "live" ? `LIVE · ${s.api_host}` : "MOCK DATA";
+  $("#mode").className = "badge " + s.mode;
+  show("overview");
+})();
+</script>
+</body>
+</html>

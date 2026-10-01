@@ -1,0 +1,47 @@
+{
+  "Policies": {
+    "items": [
+      {
+        "id": "pol-baseline",
+        "name": "Lab - Baseline guardrails",
+        "rules": 6,
+        "assigned": "All users"
+      },
+      {
+        "id": "pol-dev",
+        "name": "Lab - Developers (monitor)",
+        "rules": 2,
+        "assigned": "group: developers"
+      }
+    ]
+  },
+  "Setting profiles": {
+    "items": [
+      {
+        "id": "default",
+        "name": "Default",
+        "agent_mode": "enforce"
+      }
+    ]
+  },
+  "Effective policy": {
+    "email": "alice@demo.lab",
+    "policies": [
+      "Lab - Baseline guardrails"
+    ],
+    "rules": [
+      {
+        "id": "block-secrets-read",
+        "verdict": "block"
+      },
+      {
+        "id": "block-curl-pipe-sh",
+        "verdict": "block"
+      },
+      {
+        "id": "audit-force-push",
+        "verdict": "audit"
+      }
+    ]
+  }
+}
