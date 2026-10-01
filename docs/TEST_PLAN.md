@@ -49,8 +49,8 @@ Mark each step ✅ or ❌ as you go.
 | S2 | Device in **enforce** mode | Console → setting profile / agent mode | Enforce | |
 | S3 | Save current config (read-only) | `scripts/snapshot.sh` | `snapshot/<date>/` created | |
 | S4 | ~~Check real policy field names~~ | Done 2026-10-01: `op: regex`; fields `prompt`, `tool_input.command`, `tool_input_text`, `tool_output` | ✅ | ✅ |
-| S5 | Dry-run all policies | `scripts/create-policies.sh` | `"valid": true` for each (or errors to fix) | |
-| S6 | Create policies (asks first for each) | `scripts/create-policies.sh --apply` (admin key), **or** build them in the console from section 2 | 4 policies with IDs | |
+| S5 | Dry-run all policies | `scripts/create-policies.sh` | `"valid": true` for each (or errors to fix) | ✅ |
+| S6 | Create policies (asks first for each) | `scripts/create-policies.sh --apply` (admin key), **or** build them in the console from section 2 | 4 policies with IDs | ✅ 1256–1259 (2026-10-01) |
 | S7 | Build Lab 05 deny list | Console → data list with the 3 items in `05-agent-addon-denylist.json`, referenced by a resource-control rule | List saved | |
 | S8 | Assign Lab 01–05 to your user | Console → policy → assignments | Assigned | |
 | S9 | Confirm assignment | Dashboard tab 7 → *Effective policy* with your email, or `GET /v1/policies/effective?email=` | Lab 01–05 listed | |

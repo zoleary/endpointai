@@ -21,3 +21,5 @@
 | 2026-10-01 | Rewrote policies 01–04 in tenant format; Lab 01 now uses built-in patterns by `pattern_id` | not tested | `create-policies.sh` fills in built-in regexes from the latest snapshot. 38 offline tests pass |
 | 2026-10-01 | `scripts/probe-validate.sh` | worked | Validator accepts only `{"rules": [...]}` (option D); full policy object is rejected |
 | 2026-10-01 | `create-policies.sh` validates with `{rules: [...]}`; create falls back to a flat shape if the first is rejected | not tested | — |
+| 2026-10-01 | `create-policies.sh` dry run | worked | All 4 policies `{"valid":true,"errors":[]}` |
+| 2026-10-01 | `create-policies.sh --apply` | worked | Created Lab 01 (id 1256), Lab 02 (1257), Lab 03 (1258), Lab 04 (1259). First body shape accepted, no fallback needed |
