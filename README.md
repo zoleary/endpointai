@@ -34,7 +34,8 @@ Then follow scene 5 of the talk track. Remove the lab with `./endpoint-kit/clean
 |---|---|
 | `scripts/snapshot.sh` | Read-only. Saves your current policies, settings and groups to `snapshot/` |
 | `scripts/watch-events.sh [block]` | Read-only. Shows the 10 latest agent events |
-| `scripts/validate-policy.sh policies/lab-baseline.json` | Dry-run policy check. Nothing is saved. |
+| `scripts/create-policies.sh` | Dry-run all lab policies. Add `--apply` to create them (asks first for each one) |
+| `scripts/validate-policy.sh <file>` | Dry-run one policy |
 
 ## Safety
 

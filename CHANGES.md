@@ -13,3 +13,7 @@
 | 2026-10-01 | Endpoint kit (`setup-lab.sh`, poisoned MCP server, risky skill, hook) | worked (setup only) | Setup script and MCP server self-tested. Zscaler detections not yet tested |
 | 2026-10-01 | Policy template `policies/lab-baseline.json` | not tested | `match.field` names are placeholders; validate against `/v1/policies/patterns` |
 | 2026-10-01 | Talk track + console settings (`docs/TALK_TRACK.md`) | not tested | Run the full demo once and record results here |
+| 2026-10-01 | Replaced single baseline policy with 5 policies (secrets, dangerous commands, exfiltration, supply chain, add-on deny list) | worked (offline) | 16 rule patterns tested with should-match / should-not-match commands (34 tests pass). Not yet validated in the tenant |
+| 2026-10-01 | `scripts/create-policies.sh` (dry run, `--apply` asks per policy) | not tested | Needs Mac + API key; `--apply` needs an admin key |
+| 2026-10-01 | `docs/TEST_PLAN.md`: 6 discovery + 24 enforcement + 5 reporting tests | not tested | Run and fill in the Results log |
+| 2026-10-01 | Lab adds fake `keys/id_rsa`, `.aws/credentials`, `.kube/config` inside `~/zsai-demo` | worked | Real `~/.ssh` and `~/.aws` are never touched |

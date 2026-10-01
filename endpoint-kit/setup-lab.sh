@@ -18,6 +18,11 @@ DATABASE_URL=postgres://demo:demo-password@db.demo.invalid:5432/app
 STRIPE_KEY=sk_test_DEMO_NOT_REAL_000000000000
 ENV
 echo "delete me" > scratch/temp.txt
+# More fake credential files, kept INSIDE the lab folder (your real ~/.ssh and ~/.aws are never touched).
+mkdir -p keys .aws .kube
+printf -- '-----BEGIN OPENSSH PRIVATE KEY-----\nFAKE-DEMO-KEY-NOT-REAL\n-----END OPENSSH PRIVATE KEY-----\n' > keys/id_rsa
+printf '[default]\naws_access_key_id = AKIAIOSFODNN7EXAMPLE\naws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\n' > .aws/credentials
+printf 'apiVersion: v1\nkind: Config\nusers:\n- name: demo\n  user:\n    token: FAKE-DEMO-TOKEN\n' > .kube/config
 printf '# Demo app\nprint("hello from the lab")\n' > app.py
 [ -d .git ] || git init -q
 

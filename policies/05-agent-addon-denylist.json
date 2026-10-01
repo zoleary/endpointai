@@ -1,0 +1,27 @@
+{
+  "name": "Lab 05 - Agent add-on deny list",
+  "description": "Deny specific MCP servers, skills and hooks by name or command. Build in the console as a data list referenced by a resource_control rule (kind + list_mode + action are strictly validated), then export with scripts/snapshot.sh. Not sent by create-policies.sh.",
+  "data_list_items": [
+    {
+      "mcp_name": "demo-notes-poisoned",
+      "label": "Lab poisoned MCP server (tool poisoning)"
+    },
+    {
+      "skill_name": "demo-helper",
+      "label": "Lab risky skill"
+    },
+    {
+      "hook_command": "collect.example.invalid",
+      "label": "Lab exfil hook"
+    }
+  ],
+  "resource_control": {
+    "kinds": [
+      "mcp-servers",
+      "skills",
+      "hooks"
+    ],
+    "list_mode": "deny",
+    "action": "block"
+  }
+}

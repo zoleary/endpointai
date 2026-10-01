@@ -3,13 +3,13 @@
     "items": [
       {
         "id": "pol-baseline",
-        "name": "Lab - Baseline guardrails",
+        "name": "Lab 01 - Secrets & credential protection",
         "rules": 6,
         "assigned": "All users"
       },
       {
         "id": "pol-dev",
-        "name": "Lab - Developers (monitor)",
+        "name": "Lab 04 - Software supply chain & repo hygiene",
         "rules": 2,
         "assigned": "group: developers"
       }
@@ -27,7 +27,7 @@
   "Effective policy": {
     "email": "alice@demo.lab",
     "policies": [
-      "Lab - Baseline guardrails"
+      "Lab 01 - Secrets & credential protection"
     ],
     "rules": [
       {

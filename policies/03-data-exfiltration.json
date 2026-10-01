@@ -1,0 +1,67 @@
+{
+  "name": "Lab 03 - Data exfiltration",
+  "description": "Blocks agents sending local files or data to outside hosts. OWASP LLM02, MITRE ATLAS AML.T0057 (LLM data leakage). TEMPLATE: match.field names are placeholders until checked against GET /v1/policies/patterns or a rule exported from the console. Dry-run with scripts/create-policies.sh (validate only).",
+  "enabled": true,
+  "rules": [
+    {
+      "id": "block-upload-file",
+      "ruleType": "tool",
+      "match": {
+        "field": "tool_input.command",
+        "op": "matches",
+        "value": "curl\\b.*(-d\\s*@|--data(-binary|-raw)?\\s*@|-F\\s*\\S+=@|-T\\s|--upload-file)"
+      },
+      "events": [
+        "PreToolUse"
+      ],
+      "verdict": "block",
+      "reason": "Agent uploading a local file",
+      "user_message": "Blocked by Zscaler: uploading local files from an AI agent is not allowed."
+    },
+    {
+      "id": "block-paste-sites",
+      "ruleType": "tool",
+      "match": {
+        "field": "tool_input.command",
+        "op": "matches",
+        "value": "(pastebin\\.com|transfer\\.sh|file\\.io|0x0\\.st|webhook\\.site|ngrok\\.(io|app))"
+      },
+      "events": [
+        "PreToolUse"
+      ],
+      "verdict": "block",
+      "reason": "Known paste / tunnel / webhook site",
+      "user_message": "Blocked by Zscaler: paste, tunnel and webhook sites are not allowed."
+    },
+    {
+      "id": "block-raw-sockets",
+      "ruleType": "tool",
+      "match": {
+        "field": "tool_input.command",
+        "op": "matches",
+        "value": "(^|\\s)(nc|ncat|netcat|socat)\\s+\\S+\\s+\\d+"
+      },
+      "events": [
+        "PreToolUse"
+      ],
+      "verdict": "block",
+      "reason": "Raw network socket",
+      "user_message": "Blocked by Zscaler: raw socket tools are not allowed from AI agents."
+    },
+    {
+      "id": "audit-remote-copy",
+      "ruleType": "tool",
+      "match": {
+        "field": "tool_input.command",
+        "op": "matches",
+        "value": "(scp|rsync|sftp)\\s+.*\\S+@\\S+:"
+      },
+      "events": [
+        "PreToolUse"
+      ],
+      "verdict": "audit",
+      "reason": "Remote copy",
+      "user_message": "Logged by Zscaler: remote file copy by an AI agent."
+    }
+  ]
+}

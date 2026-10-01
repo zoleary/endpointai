@@ -20,7 +20,7 @@
 - [ ] Mac is enrolled and healthy: dashboard **2. Devices** shows your host as `active`.
 - [ ] `./endpoint-kit/setup-lab.sh --with-hook` has been run, and `~/zsai-demo` exists.
 - [ ] You've opened `claude` in `~/zsai-demo` once and approved both MCP servers, so they show up in inventory before the demo.
-- [ ] Policy **"Lab - Baseline guardrails"** is assigned to your user (see [Console settings](#console-settings)).
+- [ ] Policies **Lab 01–05** are created and assigned to your user (see `docs/TEST_PLAN.md` section 3).
 - [ ] You've run `scripts/watch-events.sh block` once and see recent events.
 - [ ] Dashboard badge says **LIVE**. If the API is down, set `ZSAI_MODE=mock`, restart, and keep going.
 - [ ] Do Not Disturb is on, and the Terminal font is large.
@@ -177,16 +177,13 @@ Scenes **1 → 4 → 5 (prompts 1, 3, 5, 7) → 7 → Close**.
 | 3 | **Device groups** | `lab-enforce` (your Mac), `lab-monitor` (second device, optional) | Shows monitor vs. enforce side by side | `GET /v1/device-groups?limit=50` |
 | 4 | **User groups** | `developers` | Assign the softer policy | `GET /v1/groups?limit=50` |
 | 5 | **Setting profile / agent mode** | **Enforce** for `lab-enforce` | Blocks only happen in enforce mode | `GET /v1/setting-profiles/effective` |
-| 6 | **Policy: Lab - Baseline guardrails** | Rules from `policies/lab-baseline.json` (secrets read → block, curl\|sh → block, rm -rf → block, force push → audit, package install → audit) | Drives scene 5 | `GET /v1/policies` |
-| 7 | **Policy assignment** | Baseline → your user, or `lab-enforce` | Make sure it applies to you | `GET /v1/policies/effective?email=you@…` |
+| 6 | **Policies: Lab 01–04** | `policies/01…04-*.json`: secrets, dangerous commands, exfiltration, supply chain (see `docs/TEST_PLAN.md` section 2) | Drives scene 5 | `GET /v1/policies` |
+| 7 | **Policy assignment** | Lab 01–05 → your user, or `lab-enforce` | Make sure it applies to you | `GET /v1/policies/effective?email=you@…` |
 | 8 | **Policy: Lab - Developers (monitor)** *(optional)* | Same rules, all set to **audit**, assigned to `developers` | Shows "observe first" rollout | `GET /v1/policies/effective?group=developers` |
 | 9 | **Data lists** *(optional)* | Deny list: MCP name `demo-notes-poisoned`, hook command containing `collect.example.invalid` | Shows allow/deny-listing specific agent add-ons | `GET /v1/data-lists` |
 | 10 | **User messages** | Friendly text on every block rule (already in the template) | Developer experience | Rule `user_message` |
 
-**Building the policy:** the easiest path is to create the five rules in the console's policy editor using the table above, then export with `scripts/snapshot.sh` to save the real JSON. `policies/lab-baseline.json` is a starting template. Its `match.field` names are placeholders until checked against `GET /v1/policies/patterns`. Dry-run it with:
-```bash
-scripts/validate-policy.sh policies/lab-baseline.json
-```
+**Building the policies:** follow `docs/TEST_PLAN.md` section 3. Dry-run them all with `scripts/create-policies.sh`, then create them with `scripts/create-policies.sh --apply` (it asks before each one), or build them in the console editor. The `match.field` names are placeholders until checked against `GET /v1/policies/patterns`.
 
 ---
 
